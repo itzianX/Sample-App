@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#101114">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=DM+Mono:wght@500&display=swap"
+    rel="stylesheet">
+  <title>Cube Master — Speedcubing Studio</title>
+  <link rel="stylesheet" href="style.css">
+  
+</head>
+
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div>
+          <h1>Cube Master</h1>
+          <p>Speedcubing studio</p>
+        </div>
+      </div>
+      <div class="top-actions"><button class="btn" id="exportBtn" aria-label="Export session"><svg class="ico"
+            viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19h14" />
+          </svg><span>Export session</span></button><button class="btn" id="importBtn" aria-label="Import session"><svg
+            class="ico" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 20V9M7.5 13.5L12 9l4.5 4.5M5 5h14" />
+          </svg><span>Import session</span></button><input type="file" id="importFile" accept="application/json,.json"
+          hidden></div>
+    </header>
+
+    <nav class="tabs" aria-label="Main navigation">
+      <button class="tab active" data-view="timer"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="13.5" r="7.5" />
+          <path d="M12 13.5V9.5M9.5 3h5M12 3v3M18.5 6.5l1.2-1.2" />
+        </svg><span>Timer</span></button><button class="tab" data-view="algorithms"><svg class="ico" viewBox="0 0 24 24"
+          aria-hidden="true">
+          <rect x="3" y="3" width="5" height="5" rx="1.3" />
+          <rect x="3" y="10" width="5" height="5" rx="1.3" />
+          <rect x="3" y="17" width="5" height="5" rx="1.3" />
+          <rect x="10" y="3" width="5" height="5" rx="1.3" />
+          <rect x="10" y="10" width="5" height="5" rx="1.3" />
+          <rect x="10" y="17" width="5" height="5" rx="1.3" />
+          <rect x="17" y="3" width="5" height="5" rx="1.3" />
+          <rect x="17" y="10" width="5" height="5" rx="1.3" />
+          <rect x="17" y="17" width="5" height="5" rx="1.3" />
+        </svg><span>Algorithms</span></button><button class="tab" data-view="practice"><svg class="ico"
+          viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="8.5" />
+          <circle cx="12" cy="12" r="4.5" />
+          <circle cx="12" cy="12" r="1" fill="currentColor" />
+        </svg><span>Practice</span></button>
+    </nav>
+
+    <main>
+      <section class="view active" id="view-timer">
+        <div class="timer-layout">
+          <section class="panel timer-main">
+            <div class="scramble-head"><span class="eyebrow">3×3 scramble</span>
+              <div class="scramble-tools"><button class="btn small" id="inspectionToggle"
+                  title="Toggle 15-second inspection">Inspection: Off</button><button class="btn small"
+                  id="copyScramble" title="Copy scramble">Copy</button><button class="btn small" id="newScramble"
+                  title="Generate another scramble">↻ New</button></div>
+            </div>
+            <div class="scramble-row">
+              <div class="scramble" id="scrambleText" aria-live="polite">Generating scramble…</div>
+              <div class="scramble-net" id="scrambleNet" aria-label="Scrambled cube preview"></div>
+            </div>
+            <div class="timer-face" id="timerFace" role="button" tabindex="0"
+              aria-label="Timer. Hold to prepare, release to start. Tap to stop.">
+              <div class="time" id="timeDisplay">0.00</div>
+              <div class="timer-hint" id="timerHint">Hold screen or Space to ready · release to start</div>
+            </div>
+            <div class="timer-status" id="timerStatus">Ready when you are · inspection is optional</div>
+            <div class="quick"><button class="btn small" id="qPlus2">+2</button><button class="btn small"
+                id="qDnf">DNF</button><button class="btn small danger" id="qDel">Delete last</button></div>
+            <div class="stats-grid">
+              <div class="stat"><label>Solves</label><strong id="statCount">0</strong></div>
+              <div class="stat"><label>Personal best</label><strong id="statBest">—</strong></div>
+              <div class="stat"><label>Ao5</label><strong id="statAo5">—</strong></div>
+              <div class="stat"><label>Ao12</label><strong id="statAo12">—</strong></div>
+            </div>
+          </section>
+          <aside class="side-stack">
+            <section class="panel side-panel">
+              <div class="panel-title">
+                <h2>Session overview</h2><span class="tag">LOCAL</span>
+              </div>
+              <div class="session-summary">
+                <div class="summary-box"><span>Session average</span><strong id="sessionAvg">—</strong></div>
+                <div class="summary-box"><span>Last solve</span><strong id="lastSolve">—</strong></div>
+                <div class="summary-box"><span>+2 penalties</span><strong id="plus2Count">0</strong></div>
+                <div class="summary-box"><span>DNFs</span><strong id="dnfCount">0</strong></div>
+              </div>
+              <div class="spark" id="spark"></div>
+              <p class="note">Times are saved in this browser on this device.</p>
+            </section>
+            <section class="panel side-panel">
+              <div class="panel-title">
+                <h2>Session history</h2><button class="btn small danger" id="clearHistory">Clear all</button>
+              </div>
+              <div class="history-list" id="historyList">
+                <div class="empty">Your solves will appear here.</div>
+              </div>
+            </section>
+          </aside>
+        </div>
+      </section>
+
+      <section class="view" id="view-algorithms">
+        <div class="section-heading">
+          <div>
+            <h2>Algorithm library</h2>
+            <p>All 119 CFOP cases: 41 F2L, 57 OLL and 21 PLL. Each diagram is drawn from its algorithm.</p>
+          </div><span class="tag" id="algoCount">0 CASES</span>
+        </div>
+        <div class="toolbar"><input class="field search" id="algoSearch" type="search"
+            placeholder="Search cases or move notation…" aria-label="Search algorithms"><select class="field"
+            id="algoCategory" aria-label="Filter category">
+            <option value="all">All categories</option>
+            <option value="F2L">F2L</option>
+            <option value="OLL">OLL</option>
+            <option value="PLL">PLL</option>
+          </select><select class="field" id="algoSort" aria-label="Sort algorithms">
+            <option value="category">Category order</option>
+            <option value="name">Name A–Z</option>
+            <option value="favorites">Favorites first</option>
+          </select></div>
+        <div class="algo-grid" id="algoGrid"></div>
+      </section>
+
+      <section class="view" id="view-practice">
+        <div class="section-heading">
+          <div>
+            <h2>Practice mode</h2>
+            <p>Recall an algorithm, reveal the answer, then rate your recall.</p>
+          </div><span class="tag" id="practiceProgress">CARD 0 / 0</span>
+        </div>
+        <div class="practice-layout">
+          <section class="panel practice-card">
+            <div class="bar session-bar" aria-label="Session progress"><i id="sessionBar" style="width:0"></i></div>
+            <span class="tag" id="practiceTag">F2L</span>
+            <div class="practice-cube" id="practiceCube"></div>
+            <h2 id="practiceName">Ready to practice?</h2>
+            <p class="muted" id="practicePrompt">Think through the case before revealing its algorithm.</p>
+            <div class="practice-algo hidden-answer" id="practiceAlgo">Select a card to begin.</div>
+            <div class="practice-controls"><button class="btn primary" id="revealAnswer">Reveal answer</button><button
+                class="btn" id="nextPractice">Next case →</button></div>
+            <div class="practice-controls" id="ratingControls" hidden><button class="btn"
+                data-rate="again">Again</button><button class="btn" data-rate="hard">Hard</button><button class="btn"
+                data-rate="good">Got it ✓</button></div>
+            <p class="note" id="practiceNote">Favorites and recall ratings are saved locally.</p>
+          </section>
+          <aside class="panel side-panel">
+            <div class="panel-title">
+              <h2>Practice settings</h2>
+            </div><label class="eyebrow" for="practiceCategory">Category</label><select class="field"
+              id="practiceCategory" style="width:100%;margin:7px 0 15px">
+              <option value="all">All algorithms</option>
+              <option value="F2L">F2L</option>
+              <option value="OLL">OLL</option>
+              <option value="PLL">PLL</option>
+              <option value="todo">Not learned yet</option>
+              <option value="favorites">Favorites only</option>
+            </select><label class="eyebrow" for="practiceSize">Session length</label><select class="field"
+              id="practiceSize" style="width:100%;margin:7px 0 15px">
+              <option value="10">10 cases</option>
+              <option value="25">25 cases</option>
+              <option value="0">All cases</option>
+            </select>
+            <div class="session-summary">
+              <div class="summary-box"><span>Reviewed</span><strong id="reviewedCount">0</strong></div>
+              <div class="summary-box"><span>Got it</span><strong id="goodCount">0</strong></div>
+            </div>
+            <h2 style="font-size:15px;margin:18px 0 10px">Progress</h2>
+            <div id="mastery"></div>
+            <p class="note">“Again” and “Hard” cases come back first in the next session. “Got it” fills the bar.</p>
+            <button class="btn" id="resetPractice" style="margin-top:14px;width:100%">Reset practice progress</button>
+          </aside>
+        </div>
+      </section>
+    </main>
+    <p class="footer-note">Cube Master · Single-file app · Scrambles and session data stay on this device.</p>
+  </div>
+
+  <nav class="mobile-nav" aria-label="Mobile navigation"><button class="tab active" data-view="timer"><svg class="ico"
+        viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="13.5" r="7.5" />
+        <path d="M12 13.5V9.5M9.5 3h5M12 3v3M18.5 6.5l1.2-1.2" />
+      </svg><span>Timer</span></button><button class="tab" data-view="algorithms"><svg class="ico" viewBox="0 0 24 24"
+        aria-hidden="true">
+        <rect x="3" y="3" width="5" height="5" rx="1.3" />
+        <rect x="3" y="10" width="5" height="5" rx="1.3" />
+        <rect x="3" y="17" width="5" height="5" rx="1.3" />
+        <rect x="10" y="3" width="5" height="5" rx="1.3" />
+        <rect x="10" y="10" width="5" height="5" rx="1.3" />
+        <rect x="10" y="17" width="5" height="5" rx="1.3" />
+        <rect x="17" y="3" width="5" height="5" rx="1.3" />
+        <rect x="17" y="10" width="5" height="5" rx="1.3" />
+        <rect x="17" y="17" width="5" height="5" rx="1.3" />
+      </svg><span>Algorithms</span></button><button class="tab" data-view="practice"><svg class="ico"
+        viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="8.5" />
+        <circle cx="12" cy="12" r="4.5" />
+        <circle cx="12" cy="12" r="1" fill="currentColor" />
+      </svg><span>Practice</span></button></nav>
+
+  <div class="modal-backdrop" id="algoModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <div class="modal-top">
+        <div><span class="tag" id="modalCategory">OLL</span>
+          <h2 id="modalTitle">Algorithm</h2>
+        </div><button class="btn small" id="closeModal" aria-label="Close details">✕</button>
+      </div>
+      <div class="mini-cube" id="modalCube"></div>
+      <div class="algo-moves" id="modalMoves"></div>
+      <p class="note" id="modalDescription"></p>
+      <div class="modal-actions"><button class="btn primary" id="copyAlgo">Copy algorithm</button><button class="btn"
+          id="favoriteAlgo">☆ Add favorite</button><button class="btn" id="practiceThis">Practice this case</button>
+      </div>
+    </div>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="script.js"></script>
+</body>
+
+</html>
