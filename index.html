@@ -6,8 +6,12 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#101114">
   <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="description" content="Cube Master: speedcubing timer, CFOP algorithm library, 3D notation guide and practice mode. Works offline.">
+  <link rel="icon" type="image/png" href="icon-192.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Cube Master">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,7 +33,11 @@
           <p>Speedcubing studio</p>
         </div>
       </div>
-      <div class="top-actions"><button class="btn" id="exportBtn" aria-label="Export session"><svg class="ico"
+      <div class="top-actions"><button class="btn install-btn" id="installBtn" hidden aria-label="Install app"><svg class="ico"
+            viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="6.5" y="3" width="11" height="18" rx="2.5" />
+            <path d="M12 8v6M9.5 11.8l2.5 2.5 2.5-2.5" />
+          </svg><span>Install app</span></button><button class="btn profile-btn" id="profileBtn" aria-label="Set up your profile"><b class="avatar" id="profileAvatar" aria-hidden="true">?</b><span id="profileLabel">Set name</span></button><button class="btn" id="exportBtn" aria-label="Export session"><svg class="ico"
             viewBox="0 0 24 24" aria-hidden="true">
             <path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19h14" />
           </svg><span>Export session</span></button><button class="btn" id="importBtn" aria-label="Import session"><svg
@@ -54,7 +62,7 @@
           <rect x="17" y="3" width="5" height="5" rx="1.3" />
           <rect x="17" y="10" width="5" height="5" rx="1.3" />
           <rect x="17" y="17" width="5" height="5" rx="1.3" />
-        </svg><span>Algorithms</span></button><button class="tab" data-view="practice"><svg class="ico"
+        </svg><span>Algorithms</span></button><button class="tab" data-view="notation"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z" /><path d="M4 7.5l8 4.5 8-4.5M12 12v9" /></svg><span>Notation</span></button><button class="tab" data-view="practice"><svg class="ico"
           viewBox="0 0 24 24" aria-hidden="true">
           <circle cx="12" cy="12" r="8.5" />
           <circle cx="12" cy="12" r="4.5" />
@@ -121,7 +129,7 @@
         <div class="section-heading">
           <div>
             <h2>Algorithm library</h2>
-            <p>All 119 CFOP cases: 41 F2L, 57 OLL and 21 PLL. Each diagram is drawn from its algorithm.</p>
+            <p>All 119 CFOP cases: 41 F2L, 57 OLL and 21 PLL. Each diagram is drawn from its algorithm. Brackets ( ) mark triggers you do as one chunk.</p>
           </div><span class="tag" id="algoCount">0 CASES</span>
         </div>
         <div class="toolbar"><input class="field search" id="algoSearch" type="search"
@@ -137,6 +145,81 @@
             <option value="favorites">Favorites first</option>
           </select></div>
         <div class="algo-grid" id="algoGrid"></div>
+      </section>
+
+      <section class="view" id="view-notation">
+        <div class="section-heading">
+          <div>
+            <h2>Notation guide</h2>
+            <p>Tap a move to watch it on the 3D cube. Drag the cube (or use the arrow keys) to look around.</p>
+          </div><span class="tag" id="n3Tag">STICKERED</span>
+        </div>
+        <div class="notation-layout">
+          <section class="panel n3-card">
+            <div class="n3-toolbar">
+              <div class="seg" role="group" aria-label="Cube style"><button class="active" data-cubestyle="stickered"
+                  aria-pressed="true">Stickered</button><button data-cubestyle="stickerless"
+                  aria-pressed="false">Stickerless</button></div>
+              <label class="n3-check"><input type="checkbox" id="n3Labels" checked> Face letters</label>
+            </div>
+            <div class="n3-stage" id="n3Stage" tabindex="0" role="group"
+              aria-label="Interactive 3D cube. Drag or use the arrow keys to rotate the view.">
+              <div class="n3-scene" id="n3Scene"></div>
+            </div>
+            <div class="n3-now" aria-live="polite">
+              <div class="n3-token" id="n3Token">R</div>
+              <div><strong id="n3Name">Right face</strong>
+                <p id="n3Desc"></p>
+              </div>
+            </div>
+            <div class="n3-log" id="n3Log"></div>
+            <div class="n3-actions"><button class="btn small" id="n3Undo">↶ Undo</button><button class="btn small"
+                id="n3Reset">Reset cube</button><button class="btn small" id="n3View">Reset view</button></div>
+          </section>
+          <aside class="side-stack">
+            <section class="panel side-panel">
+              <div class="panel-title">
+                <h2>Move pad</h2>
+              </div>
+              <div class="seg seg-full" role="group" aria-label="Move type"><button class="active" data-mod=""
+                  aria-pressed="true">Clockwise</button><button data-mod="'" aria-pressed="false">Prime ( ' )</button><button
+                  data-mod="2" aria-pressed="false">Double ( 2 )</button></div>
+              <div id="n3Pad"></div>
+              <label class="eyebrow" for="n3Seq">Try your own sequence</label>
+              <div class="n3-seq"><input class="field" id="n3Seq" placeholder="(R U R' U') (R' F R F')"
+                  autocomplete="off" autocapitalize="off" spellcheck="false"><button class="btn primary"
+                  id="n3Play">Play</button></div>
+              <div class="n3-chips"><button class="btn small" data-demo="(R U R' U')">Sexy move</button><button
+                  class="btn small" data-demo="(R' F R F')">Sledgehammer</button><button class="btn small"
+                  data-demo="(R U R' U) (R U2 R')">Sune</button></div>
+            </section>
+            <section class="panel side-panel">
+              <div class="panel-title">
+                <h2>How to read notation</h2>
+              </div>
+              <dl class="rules">
+                <div><dt>R L U D F B</dt>
+                  <dd>Right, Left, Up, Down, Front, Back. Turn that face clockwise as you look straight at it.</dd>
+                </div>
+                <div><dt>R &nbsp;R' &nbsp;R2</dt>
+                  <dd>No mark is a 90° clockwise turn. A prime ( ' ) is 90° counter-clockwise. A 2 is a 180° half turn.</dd>
+                </div>
+                <div><dt>r u l d f b</dt>
+                  <dd>Lowercase (or a "w", like Rw) turns that face and the layer behind it together.</dd>
+                </div>
+                <div><dt>M E S</dt>
+                  <dd>The three middle slices. M follows L, E follows D and S follows F.</dd>
+                </div>
+                <div><dt>x y z</dt>
+                  <dd>Rotate the whole cube in the same direction as R, U and F.</dd>
+                </div>
+                <div><dt>( )</dt>
+                  <dd>Brackets group a trigger such as (R U R' U'). Do it as one smooth chunk. They never change the moves.</dd>
+                </div>
+              </dl>
+            </section>
+          </aside>
+        </div>
       </section>
 
       <section class="view" id="view-practice">
@@ -208,7 +291,7 @@
         <rect x="17" y="3" width="5" height="5" rx="1.3" />
         <rect x="17" y="10" width="5" height="5" rx="1.3" />
         <rect x="17" y="17" width="5" height="5" rx="1.3" />
-      </svg><span>Algorithms</span></button><button class="tab" data-view="practice"><svg class="ico"
+      </svg><span>Algorithms</span></button><button class="tab" data-view="notation"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z" /><path d="M4 7.5l8 4.5 8-4.5M12 12v9" /></svg><span>Notation</span></button><button class="tab" data-view="practice"><svg class="ico"
         viewBox="0 0 24 24" aria-hidden="true">
         <circle cx="12" cy="12" r="8.5" />
         <circle cx="12" cy="12" r="4.5" />
@@ -228,6 +311,26 @@
       <div class="modal-actions"><button class="btn primary" id="copyAlgo">Copy algorithm</button><button class="btn"
           id="favoriteAlgo">☆ Add favorite</button><button class="btn" id="practiceThis">Practice this case</button>
       </div>
+    </div>
+  </div>
+  <div class="modal-backdrop" id="profileModal" role="dialog" aria-modal="true" aria-labelledby="profileTitle">
+    <div class="modal profile-modal">
+      <div class="modal-top">
+        <div><span class="tag">LOCAL PROFILE</span>
+          <h2 id="profileTitle">Your profile</h2>
+        </div><button class="btn small" id="closeProfile" aria-label="Close profile">✕</button>
+      </div>
+      <p class="note" id="profileLead"></p>
+      <label class="eyebrow" for="profileName">Your name</label>
+      <input class="field" id="profileName" maxlength="24" placeholder="e.g. Alex" autocomplete="nickname"
+        style="width:100%;margin:7px 0 16px">
+      <div class="profile-stats">
+        <div class="summary-box"><span>Total solves</span><strong id="pfSolves">0</strong></div>
+        <div class="summary-box"><span>Hours of use</span><strong id="pfHours">0 min</strong></div>
+        <div class="summary-box"><span>Days of use</span><strong id="pfDays">1</strong></div>
+      </div>
+      <p class="note">Member since <span id="pfSince">—</span>. Everything stays on this device and is included when you export your session.</p>
+      <div class="modal-actions"><button class="btn primary" id="profileSave">Save profile</button></div>
     </div>
   </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>

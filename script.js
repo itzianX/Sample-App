@@ -18,7 +18,7 @@
     if (PC[t]) return PC[t]; const m = MV[t[0]], base = m[2] == 1 ? 1 : 3, k = t[1] == "'" ? (4 - base) % 4 : t[1] == '2' ? 2 : base, P = SOLVED.slice();
     ST.forEach((s, i) => { if (!m[1](s.p)) return; let p = s.p, n = s.n; for (let q = 0; q < k; q++) { p = C[m[0]](p); n = C[m[0]](n); } P[IDX.get(p + '|' + n)] = i; }); return PC[t] = P;
   }
-  const toks = a => a.split(/\s+/).filter(Boolean);
+  const toks = a => a.replace(/[()]/g, ' ').split(/\s+/).filter(Boolean);
   function apply(arr, alg) { for (const t of toks(alg)) { const P = perm(t); arr = P.map(i => arr[i]); } return arr; }
   function inv(alg) { return toks(alg).reverse().map(t => t[1] == "'" ? t[0] : t[1] == '2' ? t : t + "'").join(' '); }
   const caseState = alg => apply(SOLVED, inv(alg));
@@ -47,26 +47,65 @@
     arr.forEach((id, j) => { const s = ST[j], g = G[s.n + ''], [a, b] = g[2](...s.p); r += `<rect x="${(g[0] * 3 + a) * c + 1}" y="${(g[1] * 3 + b) * c + 1}" width="${c - 1.5}" height="${c - 1.5}" rx="1.5" fill="${COL[ST[id].n]}"/>`; }); return r + '</svg>';
   }
 
-  const PLL = [['Aa', "x R' U R' D2 R U' R' D2 R2 x'"], ['Ab', "x R2 D2 R U R' D2 R U' R x'"], ['E', "x' R U' R' D R U R' D' R U R' D R U' R' D' x"], ['F', "R' U' F' R U R' U' R' F R2 U' R' U' R U R' U R"], ['Ga', "R2 U R' U R' U' R U' R2 U' D R' U R D'"], ['Gb', "R' U' R U D' R2 U R' U R U' R U' R2 D"], ['Gc', "R2 U' R U' R U R' U R2 D' U R U' R' D"], ['Gd', "R U R' U' D R2 U' R U' R' U R' U R2 D'"], ['H', "M2 U M2 U2 M2 U M2"], ['Ja', "x R2 F R F' R U2 r' U r U2 x'"], ['Jb', "R U R' F' R U R' U' R' F R2 U' R'"], ['Na', "R U R' U R U R' F' R U R' U' R' F R2 U' R' U2 R U' R'"], ['Nb', "R' U R U' R' F' U' F R U R' F R' F' R U' R"], ['Ra', "R U' R' U' R U R D R' U' R D' R' U2 R'"], ['Rb', "R' U2 R U2 R' F R U R' U' R' F' R2"], ['T', "R U R' U' R' F R2 U' R' U' R U R' F'"], ['Ua', "M2 U M U2 M' U M2"], ['Ub', "M2 U' M U2 M' U' M2"], ['V', "R' U R' U' y R' F' R2 U' R' U R' F R F y'"], ['Y', "F R U' R' U' R U R' F' R U R' U' R' F R F'"], ['Z', "M' U M2 U M2 U M' U2 M2"]];
+  const PLL = [['Aa', "x (R' U R') D2 (R U' R') D2 R2 x'"], ['Ab', "x R2 D2 (R U R') D2 (R U' R) x'"], ['E', "x' (R U' R' D) (R U R' D') (R U R' D) (R U' R' D') x"], ['F', "(R' U' F') (R U R' U') (R' F R2 U') (R' U' R U) (R' U R)"], ['Ga', "R2 U (R' U R' U') R U' R2 U' D (R' U R) D'"], ['Gb', "(R' U' R) U D' R2 U (R' U R U') R U' R2 D"], ['Gc', "R2 U' (R U' R) U (R' U R2) D' (U R U' R') D"], ['Gd', "(R U R' U') D (R2 U' R U' R') U R' U R2 D'"], ['H', "(M2 U M2) U2 (M2 U M2)"], ['Ja', "x (R2 F R F') R U2 (r' U r) U2 x'"], ['Jb', "(R U R' F') (R U R' U') (R' F R2 U') R'"], ['Na', "(R U R' U) (R U R' F') (R U R' U') (R' F R2 U') R' U2 (R U' R')"], ['Nb', "(R' U R U') (R' F' U' F) (R U R') (F R' F' R) U' R"], ['Ra', "(R U' R' U') (R U R D) (R' U' R D') (R' U2 R')"], ['Rb', "(R' U2 R U2) R' F (R U R' U') R' F' R2"], ['T', "(R U R' U') (R' F R2 U') (R' U' R U) (R' F')"], ['Ua', "(M2 U M) U2 (M' U M2)"], ['Ub', "(M2 U' M) U2 (M' U' M2)"], ['V', "(R' U R' U') y (R' F' R2 U') (R' U R' F) R F y'"], ['Y', "F R U' R' U' R U R' F' (R U R' U') (R' F R F')"], ['Z', "(M' U M2 U) (M2 U) (M' U2) M2"]];
   const OLL = ["R U2 R2 F R F' U2 R' F R F'", "r U r' U2 r U2 R' U2 R U' r'", "r' R2 U R' U r U2 r' U M'", "M U' r U2 r' U' R U' R' M'", "r' U2 R U R' U r", "r U2 R' U' R U' r'", "r U R' U R U2 r'", "r' U' R U' R' U2 r", "R U R' U' R' F R2 U R' U' F'", "R U R' U R' F R F' R U2 R'", "r U R' U R' F R F' R U2 r'", "F R U R' U' F' U F R U R' U' F'", "F U R U' R2 F' R U R U' R'", "R' F R U R' F' R F U' F'", "r' U' r R' U' R U r' U r", "r U r' R U R' U' r U' r'", "R U R' U R' F R F' U2 R' F R F'", "r U R' U R U2 r2 U' R U' R' U2 r", "r' R U R U R' U' M' R' F R F'", "r U R' U' M2 U R U' R' U' M'", "R U2 R' U' R U R' U' R U' R'", "R U2 R2 U' R2 U' R2 U2 R", "R2 D R' U2 R D' R' U2 R'", "r U R' U' r' F R F'", "F' r U R' U' r' F R", "R U2 R' U' R U' R'", "R U R' U R U2 R'", "r U R' U' r' R U R U' R'", "R U R' U' R U' R' F' U' F R U R'", "F R' F R2 U' R' U' R U R' F2", "R' U' F U R U' R' F' R", "R U B' U' R' U R B R'", "R U R' U' R' F R F'", "R U R2 U' R' F R U R U' F'", "R U2 R2 F R F' R U2 R'", "L' U' L U' L' U L U L F' L' F", "F R' F' R U R U' R'", "R U R' U R U' R' U' R' F R F'", "L F' L' U' L U F U' L'", "R' F R U R' U' F' U R", "R U R' U R U2 R' F R U R' U' F'", "R' U' R U' R' U2 R F R U R' U' F'", "R' U' F' U F R", "F U R U' R' F'", "F R U R' U' F'", "R' U' R' F R F' U R", "F' L' U' L U L' U' L U F", "F R U R' U' R U R' U' F'", "r U' r2 U r2 U r2 U' r", "r' U r2 U' r2 U' r2 U r'", "F U R U' R' U R U' R' F'", "R U R' U R U' B U' B' R'", "r' U' R U' R' U R U' R' U2 r", "r U R' U R U' R' U R U2 r'", "R U2 R2 U' R U' R' U2 F R F'", "r U r' U R U' R' U R U' R' r U' r'", "R U R' U' M' U R U' r'"];
 
   function arrowSvg(a, b, two) {
-    const cor = a.split(',').every(v => v != 0), O = cor ? '#0d0e11' : '#fff', N = cor ? '#fff' : '#0d0e11'; const f = k => { const [x, z] = k.split(',').map(Number); return [8 + (x + 1) * 15 + 7, 8 + (z + 1) * 15 + 7] }, p = f(a), q = f(b), L = Math.hypot(q[0] - p[0], q[1] - p[1]), ux = (q[0] - p[0]) / L, uy = (q[1] - p[1]) / L, P = [p[0] + ux * 4, p[1] + uy * 4], Q = [q[0] - ux * 4, q[1] - uy * 4], n = v => v.toFixed(1);
-    const head = (t, d) => { const bx = t[0] - ux * d * 4.6, by = t[1] - uy * d * 4.6; return `<polygon points="${n(t[0])},${n(t[1])} ${n(bx - uy * d * 2.8)},${n(by + ux * d * 2.8)} ${n(bx + uy * d * 2.8)},${n(by - ux * d * 2.8)}"/>`; };
+    // Small, slim arrows: short shaft, compact head, thin outline.
+    const cor = a.split(',').every(v => v != 0), O = cor ? '#0d0e11' : '#fff', N = cor ? '#fff' : '#0d0e11';
+    const f = k => { const [x, z] = k.split(',').map(Number); return [8 + (x + 1) * 15 + 7, 8 + (z + 1) * 15 + 7]; },
+      p = f(a), q = f(b), L = Math.hypot(q[0] - p[0], q[1] - p[1]), ux = (q[0] - p[0]) / L, uy = (q[1] - p[1]) / L,
+      GAP = 3.8, HL = 3, HW = 1.8, P = [p[0] + ux * GAP, p[1] + uy * GAP], Q = [q[0] - ux * GAP, q[1] - uy * GAP], n = v => v.toFixed(1);
+    const head = (t, d) => { const bx = t[0] - ux * d * HL, by = t[1] - uy * d * HL; return `<polygon points="${n(t[0])},${n(t[1])} ${n(bx - uy * d * HW)},${n(by + ux * d * HW)} ${n(bx + uy * d * HW)},${n(by - ux * d * HW)}"/>`; };
     const body = `<line x1="${n(P[0])}" y1="${n(P[1])}" x2="${n(Q[0])}" y2="${n(Q[1])}"/>` + head(Q, 1) + (two ? head(P, -1) : '');
-    return `<g stroke="${O}" stroke-width="3.8" stroke-linejoin="round" fill="${O}">${body}</g><g stroke="${N}" stroke-width="1.4" stroke-linejoin="round" fill="${N}">${body}</g>`;
+    return `<g stroke="${O}" stroke-width="2.1" stroke-linejoin="round" fill="${O}">${body}</g><g stroke="${N}" stroke-width="0.8" stroke-linejoin="round" fill="${N}">${body}</g>`;
   }
   function pllArrows(arr) { const mv = {}; arr.forEach((id, j) => { const s = ST[j]; if (s.n + '' != '0,1,0') return; const h = ST[id].p; if (s.p[0] != h[0] || s.p[2] != h[2]) mv[s.p[0] + ',' + s.p[2]] = h[0] + ',' + h[2]; }); const done = {}; let o = ''; for (const a in mv) { if (done[a]) continue; const b = mv[a], two = mv[b] === a; if (two) done[b] = 1; o += arrowSvg(a, b, two); } return o; }
 
   const F2LD = [["F' U2 F U F' U' F", "Pair apart in U"], ["U2 R2 U2 R' U' R U' R2", "Pair apart in U"], ["U2 F2 U2 F U F' U F2", "Pair apart in U"], ["R U2 R' U' R U R'", "Pair apart in U"], ["U2 F' U' F2 R' F' R", "Pair apart in U"], ["U R U2 R' U R U' R'", "Pair apart in U"], ["U' F' U2 F2 R' F' R", "Pair apart in U"], ["R U' R' U2 R U R'", "Pair apart in U"], ["U F' U F U' F' U' F", "Pair apart in U"], ["R U' R U2 R2 U' R2 U' R2", "Pair apart in U"], ["F U2 F2 U' F2 U' F'", "Pair apart in U"], ["U R U' R'", "Pair apart in U"], ["U R U R' U2 F' U' F", "Pair apart in U"], ["U' R U R' U2 R U' R'", "Pair apart in U"], ["F' U' F", "Pair apart in U"], ["U' R U2 R' U2 R U' R'", "Pair apart in U"], ["F R' F' R", "Pair apart in U"], ["R' U2 R2 U R2 U R", "Pair apart in U"], ["R U' R' U2 F' U' F", "Pair apart in U"], ["U' R U' R' U R U R'", "Pair apart in U"], ["R2 U2 F R2 F' U2 R2", "Pair apart in U"], ["R U R'", "Pair apart in U"], ["U F' U' F U2 F' U F", "Pair apart in U"], ["U' R U R' U R U R'", "Pair apart in U"], ["R2 U R2 U R2 U2 R2", "Corner in U, edge in slot"], ["F' U F R U2 R'", "Corner in U, edge in slot"], ["U' R U' R' U2 R U' R'", "Corner in U, edge in slot"], ["U' R U R' U F' U' F", "Corner in U, edge in slot"], ["U R U R' U2 R U R'", "Corner in U, edge in slot"], ["U F' U' F U' R U R'", "Corner in U, edge in slot"], ["U R U' R' F R' F' R", "Corner in slot, edge in U"], ["R' U' R' U' R2 U R U R", "Corner in slot, edge in U"], ["F' U F2 R' F' R", "Corner in slot, edge in U"], ["U' R U R' U' R U R'", "Corner in slot, edge in U"], ["U R' F R F2 U' F", "Corner in slot, edge in U"], ["U' R U' R' U R U' R'", "Corner in slot, edge in U"], ["R U' R U2 F R2 F' U2 R2", "Both in slot"], ["R U2 R U R' U R U2 R2", "Both in slot"], ["R U F R U R' U' F' R'", "Both in slot"], ["R2 U2 R' U' R U' R' U2 R'", "Both in slot"], ["R F U R U' R' F' U' R'", "Both in slot"]];
-  const ALGORITHMS = [...F2LD.map(([m, c], i) => ({ id: 'f2l-' + (i + 1), cat: 'F2L', name: 'F2L ' + (i + 1), moves: m, description: c + '. Colored stickers are the pair to insert into the front-right slot; black stickers are not part of the case. Turn U first to line the pieces up if needed.' })), ...OLL.map((m, i) => ({ id: 'oll-' + (i + 1), cat: 'OLL', name: 'OLL ' + (i + 1), moves: m, description: 'Orient the last layer. Grey stickers on the diagram are the ones that are not yellow yet.' })), ...PLL.map(([n, m]) => ({ id: 'pll-' + n.toLowerCase(), cat: 'PLL', name: n + ' Perm', moves: m, description: 'Permute the last layer once it is oriented. Arrows show where each piece goes; two heads mean a swap. Add a U turn before or after as needed.' }))];
+  // Groups conjugates (R U R'), triggers (R U R' U'), (R' F R F') etc. in parentheses. Never changes the moves.
+  function paren(alg) {
+    if (alg.includes('(')) return alg;
+    const t = alg.split(/\s+/).filter(Boolean), out = [], rotation = x => /^[xyz]/.test(x);
+    const isInv = (a, b) => a[0] === b[0] && ((a[1] === "'" && !b[1]) || (!a[1] && b[1] === "'"));
+    let i = 0;
+    while (i < t.length) {
+      const [a, b, c, d] = [t[i], t[i + 1], t[i + 2], t[i + 3]];
+      if (b && c && d && ![a, b, c, d].some(rotation) && a[0] !== b[0] && isInv(a, c) && isInv(b, d)) { out.push(`(${a} ${b} ${c} ${d})`); i += 4; }
+      else if (b && c && ![a, b, c].some(rotation) && a[0] !== b[0] && isInv(a, c)) { out.push(`(${a} ${b} ${c})`); i += 3; }
+      else { out.push(a); i++; }
+    }
+    return out.join(' ');
+  }
+  const TRIGGER_NOTE = ' Moves in ( ) are triggers: do each group as one smooth chunk.';
+  // Standard textbook groupings for well-known OLLs (same moves, just bracketed).
+  const OLLP = { 9: "(R U R' U') (R' F R2) (U R' U') F'", 10: "(R U R' U) (R' F R F') (R U2 R')", 12: "F (R U R' U') F' U F (R U R' U') F'", 14: "(R' F R) U (R' F' R) (F U' F')", 17: "(R U R' U) (R' F R F') U2 (R' F R F')", 20: "(r U R' U') M2 (U R U' R') U' M'", 22: "R U2 (R2 U' R2 U' R2) U2 R", 23: "R2 D (R' U2 R) D' (R' U2 R')", 24: "(r U R' U') (r' F R F')", 27: "(R U R' U) (R U2 R')", 28: "(r U R' U') (r' R U R U' R')", 30: "(F R' F R2 U') (R' U' R U) R' F2", 32: "(R U B' U') (R' U R B R')", 34: "(R U R2 U') (R' F R U) (R U' F')", 41: "(R U R' U) (R U2 R') F (R U R' U') F'", 42: "(R' U' R U') (R' U2 R) F (R U R' U') F'", 43: "R' U' (F' U F) R", 46: "R' U' (R' F R F') U R", 52: "(R U R' U) (R U' B U' B') R'", 55: "(R U2 R2) (U' R U' R') U2 (F R F')" };
+  const ALGORITHMS = [...F2LD.map(([m, c], i) => ({ id: 'f2l-' + (i + 1), cat: 'F2L', name: 'F2L ' + (i + 1), moves: paren(m), description: c + '. Colored stickers are the pair to insert into the front-right slot; black stickers are not part of the case. Turn U first to line the pieces up if needed.' + TRIGGER_NOTE })), ...OLL.map((m, i) => ({ id: 'oll-' + (i + 1), cat: 'OLL', name: 'OLL ' + (i + 1), moves: OLLP[i + 1] || paren(m), description: 'Orient the last layer. Grey stickers on the diagram are the ones that are not yellow yet.' + TRIGGER_NOTE })), ...PLL.map(([n, m]) => ({ id: 'pll-' + n.toLowerCase(), cat: 'PLL', name: n + ' Perm', moves: paren(m), description: 'Permute the last layer once it is oriented. Arrows show where each piece goes; two heads mean a swap. Add a U turn before or after as needed.' + TRIGGER_NOTE }))];
 
-  let state = { solves: [], favorites: [], practice: {}, ratings: {}, scramble: '', inspection: false };
+  ALGORITHMS.forEach(a => { a.plain = a.moves.replace(/[()]/g, '').replace(/\s+/g, ' ').trim(); });
+
+  let state = { solves: [], favorites: [], practice: {}, ratings: {}, scramble: '', inspection: false, profile: null };
   let phase = 'idle'; // idle, holding, inspection, running
   let holdTimer = null, tickTimer = null, inspectionTimer = null;
   let startedAt = 0, inspectionStarted = 0, elapsed = 0, inspectionEnabled = false, readyArmed = false;
   let pendingPenalty = 0, currentAlgorithm = null, practiceQueue = [], practiceIndex = 0, answerVisible = false, toastTimer = null;
 
+  function normProfile(p) {
+    p = p && typeof p === 'object' ? p : {};
+    const out = {
+      name: typeof p.name === 'string' ? p.name.replace(/\s+/g, ' ').trim().slice(0, 24) : '',
+      createdAt: Number.isFinite(p.createdAt) ? p.createdAt : 0,
+      usageMs: Number.isFinite(p.usageMs) && p.usageMs > 0 ? p.usageMs : 0,
+      days: Array.isArray(p.days) ? [...new Set(p.days.filter(d => /^\d{4}-\d{2}-\d{2}$/.test(d)))].slice(-3650) : [],
+      totalSolves: Number.isFinite(p.totalSolves) && p.totalSolves > 0 ? p.totalSolves : 0,
+      welcomed: !!p.welcomed
+    };
+    const solves = Array.isArray(state.solves) ? state.solves : [];
+    out.totalSolves = Math.max(out.totalSolves, solves.length);
+    if (!out.createdAt) out.createdAt = solves.length ? Math.min(Date.now(), ...solves.map(s => Number.isFinite(s.date) ? s.date : Date.now())) : Date.now();
+    if (!out.days.length) solves.forEach(s => { if (Number.isFinite(s.date) && !out.days.includes(dayKey(new Date(s.date)))) out.days.push(dayKey(new Date(s.date))); });
+    return out;
+  }
   function safeLoad() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -80,6 +119,7 @@
     if (!Array.isArray(state.favorites)) state.favorites = [];
     if (!state.practice || typeof state.practice !== 'object') state.practice = {};
     if (!state.ratings || typeof state.ratings !== 'object') state.ratings = {};
+    state.profile = normProfile(state.profile);
   }
   function persist() {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
@@ -142,7 +182,7 @@
     });
   }
   function renderSpark() { const v = state.solves.slice(0, 20).reverse().map(effective).map(t => t === Infinity ? null : t), ok = v.filter(t => t != null), h = $('spark'); if (ok.length < 2) { h.innerHTML = ''; return; } const mn = Math.min(...ok), mx = Math.max(...ok), W = 200, H = 44, pts = v.map((t, i) => t == null ? null : [(i * W / (v.length - 1)).toFixed(1), (H - 4 - (t - mn) / ((mx - mn) || 1) * (H - 8)).toFixed(1)]).filter(Boolean); h.innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><polyline points="${pts.map(p => p.join(',')).join(' ')}" fill="none" stroke="var(--green)" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg><small>Last ${v.length} solves · best ${format(mn)} · slowest ${format(mx)}</small>`; }
-  function renderAll() { renderStats(); renderHistory(); renderSpark(); renderPracticeStats(); }
+  function renderAll() { renderStats(); renderHistory(); renderSpark(); renderPracticeStats(); renderProfileChip(); }
   function generateScramble(length = 20) {
     const out = []; let prev = '', prev2 = '';
     while (out.length < length) {
@@ -181,7 +221,7 @@
   }
   function saveSolve(ms) {
     state.solves.unshift({ id: Date.now() + Math.random(), time: Math.round(ms), penalty: pendingPenalty, scramble: state.scramble, date: Date.now() });
-    pendingPenalty = 0; persist(); renderAll(); newScramble();
+    pendingPenalty = 0; state.profile.totalSolves++; persist(); renderAll(); newScramble();
   }
   function stopRunning() {
     elapsed = performance.now() - startedAt; clearClocks(); displayTimer(elapsed); setPhase('idle'); saveSolve(elapsed);
@@ -227,7 +267,7 @@
   $('timerFace').addEventListener('keydown', e => { if (e.code === 'Enter' || e.code === 'Space') { e.preventDefault(); if (e.repeat) return; beginPress(); } });
   $('timerFace').addEventListener('keyup', e => { if (e.code === 'Enter' || e.code === 'Space') { e.preventDefault(); releasePress(); } });
   document.addEventListener('keydown', e => {
-    if (e.code !== 'Space' || e.repeat || ['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON'].includes(document.activeElement.tagName)) return;
+    if (e.code !== 'Space' || e.repeat || ['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON'].includes(document.activeElement.tagName) || !$('view-timer').classList.contains('active') || document.querySelector('.modal-backdrop.open')) return;
     e.preventDefault();
     if (phase === 'running' || phase === 'inspection') toggleTimerKeyboard();
     else beginPress();
@@ -260,6 +300,7 @@
       state.favorites = Array.isArray(incoming.favorites) ? incoming.favorites.filter(id => ALGORITHMS.some(a => a.id === id)) : [];
       state.practice = incoming.practice && typeof incoming.practice === 'object' ? incoming.practice : {};
       state.ratings = incoming.ratings && typeof incoming.ratings === 'object' ? incoming.ratings : {};
+      if (incoming.profile) { const ip = normProfile(incoming.profile); state.profile = { ...ip, name: ip.name || state.profile.name, welcomed: true }; } else state.profile = normProfile(state.profile);
       persist(); renderAll(); toast('Session imported');
     } catch (err) { alert('Could not import file: ' + err.message); }
     finally { e.target.value = ''; }
@@ -282,7 +323,7 @@
   }
   function renderAlgorithms() {
     const host = $('algoGrid'), query = $('algoSearch').value.trim().toLowerCase(), cat = $('algoCategory').value, sort = $('algoSort').value;
-    let list = ALGORITHMS.filter(a => (cat === 'all' || a.cat === cat) && (`${a.name} ${a.moves} ${a.cat} ${a.description}`).toLowerCase().includes(query));
+    let list = ALGORITHMS.filter(a => (cat === 'all' || a.cat === cat) && (`${a.name} ${a.plain} ${a.moves} ${a.cat} ${a.description}`).toLowerCase().includes(query));
     if (sort === 'name') list.sort((a, b) => a.name.localeCompare(b.name));
     if (sort === 'favorites') list.sort((a, b) => Number(state.favorites.includes(b.id)) - Number(state.favorites.includes(a.id)) || a.name.localeCompare(b.name));
     $('algoCount').textContent = `${list.length} CASE${list.length === 1 ? '' : 'S'}`; host.innerHTML = '';
@@ -304,7 +345,7 @@
   function closeModal() { $('algoModal').classList.remove('open'); }
   $('closeModal').addEventListener('click', closeModal);
   $('algoModal').addEventListener('click', e => { if (e.target === $('algoModal')) closeModal(); });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeProfile(); } });
   $('copyAlgo').addEventListener('click', () => currentAlgorithm && copyText(currentAlgorithm.moves, 'Algorithm copied'));
   $('favoriteAlgo').addEventListener('click', () => { if (currentAlgorithm) { toggleFavorite(currentAlgorithm.id); syncFavoriteButton(); renderAlgorithms(); } });
   $('practiceThis').addEventListener('click', () => { if (!currentAlgorithm) return; closeModal(); switchView('practice'); $('practiceCategory').value = currentAlgorithm.cat; buildPracticeQueue(currentAlgorithm.id); });
@@ -347,15 +388,226 @@
     document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === `view-${view}`));
     if (view === 'algorithms') renderAlgorithms();
     if (view === 'practice' && !practiceQueue.length) buildPracticeQueue();
+    if (view === 'notation') N3.show();
   }
   document.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click', () => switchView(b.dataset.view)));
   ['algoSearch', 'algoCategory', 'algoSort'].forEach(id => $(id).addEventListener(id === 'algoSearch' ? 'input' : 'change', renderAlgorithms));
 
   $('qPlus2').onclick = () => { const x = state.solves[0]; if (x) { x.penalty = x.penalty === 1 ? 0 : 1; persist(); renderAll(); } }; $('qDnf').onclick = () => { const x = state.solves[0]; if (x) { x.penalty = x.penalty === 2 ? 0 : 2; persist(); renderAll(); } }; $('qDel').onclick = () => { if (state.solves.length) { state.solves.shift(); persist(); renderAll(); } };
-  safeLoad();
+  /* ===================== Local profile (no sign-in) ===================== */
+  const dayKey = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  let lastTick = Date.now(), wasVisible = document.visibilityState === 'visible';
+  function trackUsage() {
+    const now = Date.now(), dt = now - lastTick; lastTick = now;
+    if (wasVisible && dt > 0 && dt < 60000) state.profile.usageMs += dt;   // only count time the app was on screen
+    wasVisible = document.visibilityState === 'visible';
+    const k = dayKey(); if (!state.profile.days.includes(k)) state.profile.days.push(k);
+  }
+  function persistQuiet() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { } }
+  const fmtUse = ms => ms < 3600000 ? `${Math.floor(ms / 60000)} min` : `${(ms / 3600000).toFixed(1)} h`;
+  function renderProfileChip() {
+    const n = state.profile.name;
+    $('profileAvatar').textContent = n ? Array.from(n)[0].toUpperCase() : '?';
+    $('profileLabel').textContent = n || 'Set name';
+    $('profileBtn').setAttribute('aria-label', n ? `Profile: ${n}` : 'Set up your profile');
+  }
+  function fillProfileStats() {
+    const p = state.profile;
+    $('pfSolves').textContent = p.totalSolves; $('pfHours').textContent = fmtUse(p.usageMs); $('pfDays').textContent = p.days.length;
+    $('pfSince').textContent = new Date(p.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+  }
+  function openProfile() {
+    trackUsage(); fillProfileStats();
+    $('profileName').value = state.profile.name;
+    $('profileLead').textContent = state.profile.name ? 'Saved on this device only. No account or sign-in needed.' : 'Welcome! Enter a name to personalise Cube Master. No account or sign-in needed.';
+    $('profileModal').classList.add('open'); setTimeout(() => $('profileName').focus(), 60);
+  }
+  function closeProfile() { $('profileModal').classList.remove('open'); }
+  function saveProfile() {
+    const name = $('profileName').value.replace(/\s+/g, ' ').trim().slice(0, 24);
+    state.profile.name = name; state.profile.welcomed = true; persist(); renderProfileChip(); closeProfile();
+    toast(name ? `Hi ${name}! Profile saved` : 'Name cleared');
+  }
+  $('profileBtn').addEventListener('click', openProfile);
+  $('closeProfile').addEventListener('click', closeProfile);
+  $('profileModal').addEventListener('click', e => { if (e.target === $('profileModal')) closeProfile(); });
+  $('profileSave').addEventListener('click', saveProfile);
+  $('profileName').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); saveProfile(); } });
+  setInterval(() => { trackUsage(); persistQuiet(); if ($('profileModal').classList.contains('open')) fillProfileStats(); }, 15000);
+  document.addEventListener('visibilitychange', () => { trackUsage(); persistQuiet(); });
+  window.addEventListener('pagehide', () => { trackUsage(); persistQuiet(); });
+
+  /* ===================== Install button (PWA) ===================== */
+  let deferredInstall = null;
+  const isStandalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; if (!isStandalone()) $('installBtn').hidden = false; });
+  $('installBtn').addEventListener('click', async () => {
+    if (!deferredInstall) return;
+    deferredInstall.prompt(); try { await deferredInstall.userChoice; } catch (_) { }
+    deferredInstall = null; $('installBtn').hidden = true;
+  });
+  window.addEventListener('appinstalled', () => { deferredInstall = null; $('installBtn').hidden = true; toast('Cube Master installed'); });
+
+  /* ===================== 3D notation cube ===================== */
+  const N3 = (() => {
+    // CSS 3D space: x → right, y → DOWN, z → towards you. U = y -1, D = y +1, F = z +1, B = z -1, R = x +1, L = x -1.
+    const S = 60, H = S / 2, ID = [1, 0, 0, 0, 1, 0, 0, 0, 1];
+    const COLORS = { U: '#f8fafc', D: '#facc15', F: '#16a34a', B: '#2563eb', R: '#dc2626', L: '#f97316' };
+    const FACE_T = { F: `translateZ(${H}px)`, B: `rotateY(180deg) translateZ(${H}px)`, R: `rotateY(90deg) translateZ(${H}px)`, L: `rotateY(-90deg) translateZ(${H}px)`, U: `rotateX(90deg) translateZ(${H}px)`, D: `rotateX(-90deg) translateZ(${H}px)` };
+    // [axis, which cubies move, degrees for a clockwise (unprimed) turn]
+    const MOVES = {
+      R: ['x', p => p[0] === 1, 90], L: ['x', p => p[0] === -1, -90], U: ['y', p => p[1] === -1, -90], D: ['y', p => p[1] === 1, 90], F: ['z', p => p[2] === 1, 90], B: ['z', p => p[2] === -1, -90],
+      M: ['x', p => p[0] === 0, -90], E: ['y', p => p[1] === 0, 90], S: ['z', p => p[2] === 0, 90],
+      r: ['x', p => p[0] >= 0, 90], l: ['x', p => p[0] <= 0, -90], u: ['y', p => p[1] <= 0, -90], d: ['y', p => p[1] >= 0, 90], f: ['z', p => p[2] >= 0, 90], b: ['z', p => p[2] <= 0, -90],
+      x: ['x', () => true, 90], y: ['y', () => true, -90], z: ['z', () => true, 90]
+    };
+    const NAME = { R: 'Right face', L: 'Left face', U: 'Up face', D: 'Down face', F: 'Front face', B: 'Back face', M: 'Middle slice', E: 'Equator slice', S: 'Standing slice', r: 'Right wide turn', l: 'Left wide turn', u: 'Up wide turn', d: 'Down wide turn', f: 'Front wide turn', b: 'Back wide turn', x: 'Rotation x', y: 'Rotation y', z: 'Rotation z' };
+    const WHAT = { R: 'the right face', L: 'the left face', U: 'the top face', D: 'the bottom face', F: 'the front face', B: 'the back face', M: 'the middle layer between L and R', E: 'the middle layer between U and D', S: 'the middle layer between F and B', r: "the right two layers together (R + M')", l: 'the left two layers together (L + M)', u: "the top two layers together (U + E')", d: 'the bottom two layers together (D + E)', f: 'the front two layers together (F + S)', b: "the back two layers together (B + S')", x: 'the whole cube', y: 'the whole cube', z: 'the whole cube' };
+    const FOLLOWS = { M: 'L', E: 'D', S: 'F', r: 'R', l: 'L', u: 'U', d: 'D', f: 'F', b: 'B', x: 'R', y: 'U', z: 'F' };
+    const GROUPS = [['Face turns', 'RLUDFB'], ['Slice turns', 'MES'], ['Wide turns (two layers)', 'rludfb'], ['Whole-cube rotations', 'xyz']];
+    const REDUCE = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const mul3 = (A, B) => { const C = new Array(9); for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) { let s = 0; for (let k = 0; k < 3; k++) s += A[i * 3 + k] * B[k * 3 + j]; C[i * 3 + j] = s; } return C; };
+    const mulv = (A, v) => [A[0] * v[0] + A[1] * v[1] + A[2] * v[2], A[3] * v[0] + A[4] * v[1] + A[5] * v[2], A[6] * v[0] + A[7] * v[1] + A[8] * v[2]];
+    const rot = (axis, deg) => { const a = deg * Math.PI / 180, c = Math.cos(a), s = Math.sin(a); return axis === 'x' ? [1, 0, 0, 0, c, -s, 0, s, c] : axis === 'y' ? [c, 0, s, 0, 1, 0, -s, 0, c] : [c, -s, 0, s, c, 0, 0, 0, 1]; };
+    const q = v => +v.toFixed(5);
+    const css = (R, t) => `matrix3d(${[R[0], R[3], R[6], 0, R[1], R[4], R[7], 0, R[2], R[5], R[8], 0, t[0], t[1], t[2], 1].map(q).join(',')})`;
+    const invTok = t => t.length === 1 ? t + "'" : t[1] === "'" ? t[0] : t;
+
+    let scene, stage, built = false, wired = false;
+    const cubies = [];
+    let queue = [], busy = false, gen = 0, played = [], mod = '', vx = -26, vy = -38, drag = null;
+
+    function render(c, Q) {
+      const R = Q ? mul3(Q, c.R) : c.R, t = (Q ? mulv(Q, c.p) : c.p).map(v => v * S);
+      c.el.style.transform = css(R, t);
+    }
+    function build() {
+      scene.innerHTML = ''; cubies.length = 0;
+      for (let x = -1; x <= 1; x++) for (let y = -1; y <= 1; y++) for (let z = -1; z <= 1; z++) {
+        const el = document.createElement('div'); el.className = 'cubie';
+        const center = [x, y, z].filter(v => v === 0).length === 2;
+        [['R', x === 1], ['L', x === -1], ['U', y === -1], ['D', y === 1], ['F', z === 1], ['B', z === -1]].forEach(([k, on]) => {
+          const f = document.createElement('div'); f.className = 'cf' + (on ? '' : ' in'); f.style.transform = FACE_T[k];
+          if (on) { f.style.setProperty('--c', COLORS[k]); f.style.setProperty('--lc', k === 'U' || k === 'D' ? '#15171c' : '#fff'); f.innerHTML = '<i class="st"></i>' + (center ? `<b>${k}</b>` : ''); }
+          el.appendChild(f);
+        });
+        scene.appendChild(el);
+        const c = { el, p: [x, y, z], p0: [x, y, z], R: ID.slice() }; cubies.push(c); render(c);
+      }
+      built = true;
+    }
+    function resetCube() {
+      gen++; queue = []; busy = false; played = []; cubies.forEach(c => { c.p = c.p0.slice(); c.R = ID.slice(); render(c); }); renderLog();
+    }
+    function applyView() {
+      const k = stage.clientWidth ? Math.max(.55, Math.min(1.3, Math.min(stage.clientWidth, stage.clientHeight) / 285)) : 1;
+      scene.style.transform = `scale3d(${k},${k},${k}) rotateX(${vx}deg) rotateY(${vy}deg)`;
+    }
+    function describe(tok) {
+      const base = tok[0], m = tok.slice(1), face = 'RLUDFB'.includes(base), verb = 'xyz'.includes(base) ? 'Rotate' : 'Turn';
+      const amt = m === '2' ? '180°, a half turn (direction does not matter)'
+        : m === "'" ? "90° the opposite way (the prime ' reverses the turn)"
+          : face ? '90° clockwise as you look straight at that face' : `90° in the same direction as ${FOLLOWS[base]}`;
+      return `${verb} ${WHAT[base]} ${amt}.`;
+    }
+    function setNow(tok) {
+      $('n3Token').textContent = tok; $('n3Name').textContent = NAME[tok[0]] + (tok[1] === "'" ? ' · prime' : tok[1] === '2' ? ' · double' : ''); $('n3Desc').textContent = describe(tok);
+    }
+    function renderLog() {
+      const el = $('n3Log'); el.textContent = played.length ? played.slice(-24).join(' ') : 'Moves you play appear here.'; el.classList.toggle('empty-log', !played.length);
+    }
+    function enqueue(tok, record = true) { queue.push({ tok, record }); if (!busy) next(); }
+    function next() {
+      const it = queue.shift(); if (!it) { busy = false; return; }
+      busy = true; const myGen = gen, tok = it.tok, base = tok[0], m = tok.slice(1), [axis, pred, deg] = MOVES[base];
+      const total = m === '2' ? deg * 2 : m === "'" ? -deg : deg, group = cubies.filter(c => pred(c.p));
+      let dur = REDUCE ? 1 : (m === '2' ? 420 : 280); if (queue.length > 5) dur *= .55;
+      setNow(tok); if (it.record) { played.push(tok); renderLog(); }
+      const t0 = performance.now();
+      const frame = now => {
+        if (myGen !== gen) return;
+        const k = Math.min(1, (now - t0) / dur), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+        const Q = rot(axis, total * e); group.forEach(c => render(c, Q));
+        if (k < 1) requestAnimationFrame(frame);
+        else {
+          const Qf = rot(axis, total);
+          group.forEach(c => { c.R = mul3(Qf, c.R).map(v => Math.round(v) + 0); c.p = mulv(Qf, c.p).map(v => Math.round(v) + 0); render(c); });
+          next();
+        }
+      };
+      requestAnimationFrame(frame);
+    }
+    function parseSeq(str) {
+      const out = [];
+      for (const raw of str.replace(/[()]/g, ' ').replace(/[’`]/g, "'").split(/\s+/).filter(Boolean)) {
+        const t = raw.replace(/^([RLUDFB])w/, (a, l) => l.toLowerCase()), mm = t.match(/^([RLUDFBMESrludfbxyz])(2'|'2|2|')?$/);
+        if (!mm) return { bad: raw };
+        out.push(mm[1] + (mm[2] ? (mm[2] === "'" ? "'" : '2') : ''));
+      }
+      return { moves: out };
+    }
+    function playSeq(str, fromSolved) {
+      const r = parseSeq(str); if (r.bad) { toast(`"${r.bad}" is not a valid move`); return; }
+      if (!r.moves.length) { toast('Type some moves first'); return; }
+      if (fromSolved) resetCube(); r.moves.forEach(t => enqueue(t));
+    }
+    function buildPad() {
+      const host = $('n3Pad'); host.innerHTML = '';
+      GROUPS.forEach(([title, letters]) => {
+        const g = document.createElement('div'); g.className = 'pad-group';
+        const h = document.createElement('span'); h.className = 'eyebrow'; h.textContent = title;
+        const pad = document.createElement('div'); pad.className = 'pad' + (letters.length === 3 ? ' pad3' : '');
+        [...letters].forEach(l => { const b = document.createElement('button'); b.className = 'btn'; b.dataset.move = l; b.textContent = l + mod; b.setAttribute('aria-label', `${NAME[l]}${mod === "'" ? ' prime' : mod === '2' ? ' double' : ''}`); pad.appendChild(b); });
+        g.append(h, pad); host.appendChild(g);
+      });
+    }
+    function setStyle(style) {
+      state.cubeStyle = style === 'stickerless' ? 'stickerless' : 'stickered';
+      scene.classList.toggle('stickerless', state.cubeStyle === 'stickerless');
+      document.querySelectorAll('[data-cubestyle]').forEach(b => { const on = b.dataset.cubestyle === state.cubeStyle; b.classList.toggle('active', on); b.setAttribute('aria-pressed', on); });
+      $('n3Tag').textContent = state.cubeStyle.toUpperCase();
+    }
+    function setLabels(on) { state.cubeLabels = !!on; scene.classList.toggle('labels', !!on); $('n3Labels').checked = !!on; }
+    function wire() {
+      wired = true;
+      $('n3Pad').addEventListener('click', e => { const b = e.target.closest('[data-move]'); if (b) enqueue(b.dataset.move + mod); });
+      document.querySelectorAll('[data-mod]').forEach(b => b.addEventListener('click', () => {
+        mod = b.dataset.mod; document.querySelectorAll('[data-mod]').forEach(x => { const on = x === b; x.classList.toggle('active', on); x.setAttribute('aria-pressed', on); }); buildPad();
+      }));
+      document.querySelectorAll('[data-cubestyle]').forEach(b => b.addEventListener('click', () => { setStyle(b.dataset.cubestyle); persist(); }));
+      $('n3Labels').addEventListener('change', e => { setLabels(e.target.checked); persist(); });
+      $('n3Undo').addEventListener('click', () => { const last = played.pop(); if (!last) { toast('Nothing to undo'); return; } renderLog(); enqueue(invTok(last), false); });
+      $('n3Reset').addEventListener('click', () => { resetCube(); setNow('R'); toast('Cube reset'); });
+      $('n3View').addEventListener('click', () => { vx = -26; vy = -38; applyView(); });
+      $('n3Play').addEventListener('click', () => playSeq($('n3Seq').value, false));
+      $('n3Seq').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); playSeq($('n3Seq').value, false); } });
+      document.querySelectorAll('[data-demo]').forEach(b => b.addEventListener('click', () => { $('n3Seq').value = b.dataset.demo; playSeq(b.dataset.demo, true); }));
+      stage.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY }; try { stage.setPointerCapture(e.pointerId); } catch (_) { } stage.classList.add('dragging'); });
+      stage.addEventListener('pointermove', e => {
+        if (!drag) return; vy += (e.clientX - drag.x) * .6; vx = Math.max(-89, Math.min(89, vx - (e.clientY - drag.y) * .6)); drag = { x: e.clientX, y: e.clientY }; applyView();
+      });
+      ['pointerup', 'pointercancel'].forEach(t => stage.addEventListener(t, () => { drag = null; stage.classList.remove('dragging'); }));
+      stage.addEventListener('keydown', e => {
+        const d = { ArrowLeft: [0, -12], ArrowRight: [0, 12], ArrowUp: [12, 0], ArrowDown: [-12, 0] }[e.key]; if (!d) return;
+        e.preventDefault(); vx = Math.max(-89, Math.min(89, vx + d[0])); vy += d[1]; applyView();
+      });
+      window.addEventListener('resize', () => { if (built) applyView(); });
+    }
+    function show() {
+      scene = $('n3Scene'); stage = $('n3Stage');
+      if (!built) { build(); buildPad(); renderLog(); setNow('R'); }
+      if (!wired) wire();
+      setStyle(state.cubeStyle); setLabels(state.cubeLabels !== false); applyView();
+    }
+    return { show };
+  })();
+
+  safeLoad(); trackUsage();
   if (!state.scramble) state.scramble = generateScramble();
   $('scrambleText').textContent = state.scramble; drawNet();
   renderAll(); renderAlgorithms(); buildPracticeQueue();
+  if (!state.profile.name && !state.profile.welcomed) setTimeout(() => { if (!document.querySelector('.modal-backdrop.open') && phase === 'idle') { state.profile.welcomed = true; persist(); openProfile(); } }, 900);
 })();
 
 if ('serviceWorker' in navigator) { window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () { }); }); }
